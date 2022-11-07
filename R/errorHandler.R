@@ -124,7 +124,7 @@ errorHandler <-
           resContent <- httr::content(res, simplifyVector = FALSE)
           if (exists('rselenium_show_raw_response') &&
               rselenium_show_raw_response) {
-            if (!exists('rselenium_show_raw_response')) {
+            if (!exists('rselenium_show_raw_response_debug_function')) {
               print(
                 'rselenium_show_raw_response_debug_function(resContent) not set. ignore environment.'
               )
