@@ -131,8 +131,6 @@ errorHandler <-
             } else {
               rselenium_show_raw_response_debug_function(resContent)
             }
-          } else {
-            print('rselenium_show_raw_response = F')
           }
           checkStatus(resContent)
         } else {
