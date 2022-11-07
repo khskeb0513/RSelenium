@@ -107,7 +107,9 @@ errorHandler <-
         "A method to communicate with the remote server implementing the
           JSON wire protocol."
         getUC.params <-
-          list(url = ipAddr, verb = method, body = qdata, encode = "json", add_headers("content-type" = "application/json;charset=utf-8"))
+          list(url = ipAddr, verb = method, body = qdata, 
+#                encode = "json",
+               add_headers("content-type" = "application/json;charset=utf-8"))
         res <- tryCatch(
           do.call(httr::VERB, getUC.params),
           error = function(e) e
