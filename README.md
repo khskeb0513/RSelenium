@@ -25,6 +25,8 @@ remove.packages('RSelenium') # remove installed package
 detach('package:RSelenium', unload = T) # unload package from memory
 ```
 
+then follow upper steps.
+
 ## Usage
 
 Set global variables to show raw responses.
