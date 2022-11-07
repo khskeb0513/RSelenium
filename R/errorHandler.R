@@ -102,26 +102,44 @@ errorHandler <-
         hcode <<- NA_integer_
         value <<- list()
       },
-
-      queryRD = function(ipAddr, method = "GET", qdata = NULL) {
+      
+      queryRD = function(ipAddr,
+                         method = "GET",
+                         qdata = NULL) {
         "A method to communicate with the remote server implementing the
           JSON wire protocol."
         getUC.params <-
-          list(url = ipAddr, verb = method, body = qdata, 
-#                encode = "json",
-               add_headers("content-type" = "application/json;charset=utf-8"))
+          list(
+            url = ipAddr,
+            verb = method,
+            body = jsonlite::toJSON(qdata, auto_unbox = TRUE, digits = 22),
+            config = httr::add_headers("content-type" = "application/json;charset=utf-8")
+          )
         res <- tryCatch(
           do.call(httr::VERB, getUC.params),
-          error = function(e) e
+          error = function(e)
+            e
         )
         if (inherits(res, "response")) {
           resContent <- httr::content(res, simplifyVector = FALSE)
+          if (exists('rselenium_show_raw_response') &&
+              rselenium_show_raw_response) {
+            if (!exists('rselenium_show_raw_response')) {
+              print(
+                'rselenium_show_raw_response_debug_function(resContent) not set. ignore environment.'
+              )
+            } else {
+              rselenium_show_raw_response_debug_function(resContent)
+            }
+          } else {
+            print('rselenium_show_raw_response = F')
+          }
           checkStatus(resContent)
         } else {
           checkError(res)
         }
       },
-
+      
       checkStatus = function(resContent) {
         "An internal method to check the status returned by the server. If
         status indicates an error an appropriate error message is thrown."
@@ -149,67 +167,57 @@ errorHandler <-
           } else {
             list()
           }
-          errId <- which(
-            statusCodes[["Code"]] == as.integer(status)
-          )
+          errId <-
+            which(statusCodes[["Code"]] == as.integer(status))
           if (length(errId) > 0 && status > 1L) {
             errMessage <- statusCodes[errId, c("Summary", "Detail")]
             errMessage[["class"]] <- value[["class"]]
-            errMessage <- paste(
-              "\t",
-              paste(names(errMessage), errMessage, sep = ": ")
-            )
+            errMessage <- paste("\t",
+                                paste(names(errMessage), errMessage, sep = ": "))
             errMessage[-1] <- paste("\n", errMessage[-1])
             errMessage <-
-              c(
-                errMessage,
-                "\n\t Further Details: run errorDetails method"
-              )
+              c(errMessage,
+                "\n\t Further Details: run errorDetails method")
             if (!is.null(value[["message"]])) {
               message("\nSelenium message:", value[["message"]], "\n")
             }
             stop(errMessage, call. = FALSE)
           }
         } else {
-
+          
         }
       },
-
+      
       checkError = function(res) {
         status <<- 13L
         statusclass <<- NA_character_
         hcode <<- NA_integer_
         value <<- list()
-        eMessage <- list(
-          "Invalid call to server. Please check you have opened a browser.",
-          paste0(
-            "Couldnt connect to host on ",
-            obscureUrlPassword(serverURL),
-            ".\n  Please ensure a Selenium server is running."
-          ),
-          function(x) {
-            paste0("Undefined error in httr call. httr output: ", x)
-          }
-        )
-        err <- switch(
-          res[["message"]],
-          "Couldn't connect to server" = eMessage[[2]],
-          eMessage[[3]](res[["message"]])
-        )
+        eMessage <-
+          list("Invalid call to server. Please check you have opened a browser.",
+               paste0(
+                 "Couldnt connect to host on ",
+                 obscureUrlPassword(serverURL),
+                 ".\n  Please ensure a Selenium server is running."
+               ),
+               function(x) {
+                 paste0("Undefined error in httr call. httr output: ", x)
+               })
+        err <- switch(res[["message"]],
+                      "Couldn't connect to server" = eMessage[[2]],
+                      eMessage[[3]](res[["message"]]))
         stop(err)
       },
-
+      
       errorDetails = function(type = "value") {
         "Return error details. Type can one of c(\"value\", \"class\",
         \"status\")"
-        switch(
-          type,
-          value = value,
-          class = statusclass,
-          status = status
-        )
+        switch(type,
+               value = value,
+               class = statusclass,
+               status = status)
       },
-
+      
       obscureUrlPassword = function(url) {
         "Replaces the username and password of url with ****"
         parsedUrl <- parse_url(url)
