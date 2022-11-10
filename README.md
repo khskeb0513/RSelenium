@@ -7,6 +7,8 @@ forked from [https://github.com/ropensci/RSelenium](https://github.com/ropensci/
 - Not use httr::VERB option `encode = "json"`
 - Set custom header `Content-Type: application/json; charset=utf-8;`
 
+최신 버전(Rselenium Grid) 도입 시 RSelenium이 json 방식으로 request 시 헤더의 content-type 에 charset=utf-8 을 누락하는 문제 해결
+
 To avoid error that origined from requesting JSON MIME Type request without `charset=utf-8` header.
 
 ## Installation
